@@ -173,6 +173,13 @@ func (this EvaluableExpression) evaluateStage(stage *evaluationStage, parameters
 		if err != nil {
 			return nil, err
 		}
+
+		if left == true{
+			left = 1.0
+		}
+		if left == false{
+			left = 0.0
+		}
 	}
 
 	if stage.isShortCircuitable() {
@@ -206,10 +213,30 @@ func (this EvaluableExpression) evaluateStage(stage *evaluationStage, parameters
 		if err != nil {
 			return nil, err
 		}
+		if right == true{
+			right = 1.0
+		}
+		if right == false{
+			right = 0.0
+		}
 	}
 
 	if this.ChecksTypes {
 		if stage.typeCheck == nil {
+			if stage.isShortCircuitable() {
+				if left == 1.0{
+					left = true
+				}
+				if left == 0.0{
+					left = false
+				}
+				if right == 1.0{
+					right = true
+				}
+				if right == 0.0{
+					right = false
+				}
+			}
 
 			err = typeCheck(stage.leftTypeCheck, left, stage.symbol, stage.typeErrorFormat)
 			if err != nil {
