@@ -23,14 +23,13 @@ func parseTokens(expression string, functions map[string]ExpressionFunction) ([]
 	stream = newLexerStream(expression)
 	state = validLexerStates[0]
 
+	count := 0
 	for stream.canRead() {
 
 		token, err, found = readToken(stream, state, functions)
-
 		if err != nil {
 			return ret, err
 		}
-
 		if !found {
 			break
 		}
@@ -41,7 +40,21 @@ func parseTokens(expression string, functions map[string]ExpressionFunction) ([]
 		}
 
 		// append this valid token
-		ret = append(ret, token)
+
+		switch token.Kind {
+		case ACCESSOR:
+			ret = append(ret, ExpressionToken{Kind: CLAUSE, Value: '('})
+			ret = append(ret, token)
+			count++
+		case CLAUSE_CLOSE:
+			ret = append(ret, token)
+			if count > 0 {
+				ret = append(ret, ExpressionToken{Kind: CLAUSE_CLOSE, Value: ')'})
+				count--
+			}
+		default:
+			ret = append(ret, token)
+		}
 	}
 
 	err = checkBalance(ret)
